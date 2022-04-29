@@ -1,0 +1,191 @@
+{
+    "version": "FA2-nft",
+    "description": "This is a NFT demo",
+    "interfaces": [ "TZIP-012", "TZIP-016" ],
+    "authors": [ "vincent" ],
+    "homepage": "https://example.com",
+    "views": [
+      {
+        "name": "get_balance",
+        "pure": true,
+        "description": "This is the `get_balance` view defined in TZIP-12.",
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "parameter": { "prim": "pair", "args": [ { "prim": "address", "annots": [ "%owner" ] }, { "prim": "nat", "annots": [ "%token_id" ] } ] },
+              "returnType": { "prim": "nat" },
+              "code": [
+                { "prim": "UNPAIR" },
+                { "prim": "SWAP" },
+                { "prim": "DUP" },
+                { "prim": "DUG", "args": [ { "int": "2" } ] },
+                { "prim": "GET", "args": [ { "int": "8" } ] },
+                { "prim": "SWAP" },
+                { "prim": "DUP" },
+                { "prim": "DUG", "args": [ { "int": "2" } ] },
+                { "prim": "CDR" },
+                { "prim": "MEM" },
+                { "prim": "IF", "args": [ [], [ { "prim": "PUSH", "args": [ { "prim": "string" }, { "string": "FA2_TOKEN_UNDEFINED" } ] }, { "prim": "FAILWITH" } ] ] },
+                { "prim": "SWAP" },
+                { "prim": "CAR" },
+                { "prim": "GET", "args": [ { "int": "3" } ] },
+                { "prim": "SWAP" },
+                { "prim": "GET" },
+                { "prim": "IF_NONE", "args": [ [ { "prim": "PUSH", "args": [ { "prim": "int" }, { "int": "576" } ] }, { "prim": "FAILWITH" } ], [] ] }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "does_token_exist",
+        "pure": true,
+        "description": "Ask whether a token ID is exists.",
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "parameter": { "prim": "nat" },
+              "returnType": { "prim": "bool" },
+              "code": [ { "prim": "UNPAIR" }, { "prim": "SWAP" }, { "prim": "GET", "args": [ { "int": "8" } ] }, { "prim": "SWAP" }, { "prim": "MEM" } ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "count_tokens",
+        "pure": true,
+        "description": "Get how many tokens are in this FA2 contract.\n        ",
+        "implementations": [
+          { "michelsonStorageView": { "returnType": { "prim": "nat" }, "code": [ { "prim": "CAR" }, { "prim": "CAR" }, { "prim": "CDR" }, { "prim": "SIZE" } ] } }
+        ]
+      },
+      {
+        "name": "all_tokens",
+        "pure": true,
+        "description":
+          "\n            This view is specified (but optional) in the standard.\n\n            This contract is built with assume_consecutive_token_ids =\n            False, so we convert the set of tokens from the storage to a list\n            to fit the expected type of TZIP-16.\n            ",
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "returnType": { "prim": "list", "args": [ { "prim": "nat" } ] },
+              "code": [
+                { "prim": "CAR" },
+                { "prim": "CAR" },
+                { "prim": "CDR" },
+                { "prim": "NIL", "args": [ { "prim": "nat" } ] },
+                { "prim": "SWAP" },
+                { "prim": "ITER", "args": [ [ { "prim": "CONS" } ] ] },
+                { "prim": "NIL", "args": [ { "prim": "nat" } ] },
+                { "prim": "SWAP" },
+                { "prim": "ITER", "args": [ [ { "prim": "CONS" } ] ] }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "is_operator",
+        "pure": true,
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "parameter": {
+                "prim": "pair",
+                "args": [
+                  { "prim": "address", "annots": [ "%owner" ] },
+                  { "prim": "pair", "args": [ { "prim": "address", "annots": [ "%operator" ] }, { "prim": "nat", "annots": [ "%token_id" ] } ] }
+                ]
+              },
+              "returnType": { "prim": "bool" },
+              "code": [
+                { "prim": "UNPAIR" },
+                { "prim": "SWAP" },
+                { "prim": "GET", "args": [ { "int": "3" } ] },
+                { "prim": "CDR" },
+                { "prim": "SWAP" },
+                { "prim": "DUP" },
+                { "prim": "GET", "args": [ { "int": "4" } ] },
+                { "prim": "SWAP" },
+                { "prim": "DUP" },
+                { "prim": "GET", "args": [ { "int": "3" } ] },
+                { "prim": "SWAP" },
+                { "prim": "CAR" },
+                { "prim": "PAIR", "args": [ { "int": "3" } ] },
+                { "prim": "MEM" }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "admin",
+        "pure": true,
+        "description": "retuen the admin address.",
+        "implementations": [ { "michelsonStorageView": { "returnType": { "prim": "address" }, "code": [ { "prim": "CAR" }, { "prim": "CAR" }, { "prim": "CAR" } ] } } ]
+      },
+      {
+        "name": "minter",
+        "pure": true,
+        "description": "retuen the minter address.",
+        "implementations": [ { "michelsonStorageView": { "returnType": { "prim": "address" }, "code": [ { "prim": "GET", "args": [ { "int": "3" } ] }, { "prim": "CAR" } ] } } ]
+      },
+      {
+        "name": "get_balance_by_account",
+        "pure": true,
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "parameter": { "prim": "address" },
+              "returnType": { "prim": "set", "args": [ { "prim": "nat" } ] },
+              "code": [
+                { "prim": "UNPAIR" },
+                { "prim": "SWAP" },
+                { "prim": "CAR" },
+                { "prim": "GET", "args": [ { "int": "5" } ] },
+                { "prim": "SWAP" },
+                { "prim": "GET" },
+                { "prim": "IF_NONE", "args": [ [ { "prim": "PUSH", "args": [ { "prim": "int" }, { "int": "585" } ] }, { "prim": "FAILWITH" } ], [] ] }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "is_all_operator",
+        "pure": true,
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "parameter": { "prim": "pair", "args": [ { "prim": "address", "annots": [ "%owner" ] }, { "prim": "address", "annots": [ "%operator" ] } ] },
+              "returnType": { "prim": "bool" },
+              "code": [ { "prim": "UNPAIR" }, { "prim": "SWAP" }, { "prim": "GET", "args": [ { "int": "5" } ] }, { "prim": "SWAP" }, { "prim": "MEM" } ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "token_metadata",
+        "pure": true,
+        "description": "Get Token Metadata",
+        "implementations": [
+          {
+            "michelsonStorageView": {
+              "parameter": { "prim": "nat" },
+              "returnType": {
+                "prim": "pair",
+                "args": [ { "prim": "nat", "annots": [ "%token_id" ] }, { "prim": "map", "args": [ { "prim": "string" }, { "prim": "bytes" } ], "annots": [ "%token_info" ] } ]
+              },
+              "code": [
+                { "prim": "UNPAIR" },
+                { "prim": "SWAP" },
+                { "prim": "GET", "args": [ { "int": "8" } ] },
+                { "prim": "SWAP" },
+                { "prim": "GET" },
+                { "prim": "IF_NONE", "args": [ [ { "prim": "PUSH", "args": [ { "prim": "int" }, { "int": "695" } ] }, { "prim": "FAILWITH" } ], [] ] }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
