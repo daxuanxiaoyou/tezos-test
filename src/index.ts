@@ -29,7 +29,9 @@ import {
   transferNfts,
   mintNft,
   getTokenMetadata,
-  updateTokenMetadata
+  updateTokenMetadata,
+  testBatch,
+  isMint
 } from "./nft";
 
 
@@ -64,7 +66,9 @@ const rpcProviders = {
 };
 
 
-let network: Network = "hangzhou2net";
+//let network: Network = "hangzhou2net";
+
+let network: Network = "mainnet";
 
 function getTezos() {
   const tezos = new TezosToolkit(rpcProviders[network]);
@@ -193,28 +197,40 @@ async function main() {
   var tezos = getTezos();
 
   /*
-  //create NFT contract
+  //=========测试batch交易
+  var batch = await testBatch(tezos);
+  console.log(batch);
+  */
 
+  /*
+  //=========create NFT contract
   let con = await originateNft(tezos, 'ipfs://QmP9nURRTUpmL75UDH1dSnGwZnSvR8rz2UhKUBAWsaBJyn');
-
   console.log("con is ", con.address);
   */
 
-
-  //===第一版的地址
-  var address1 = 'KT1P1f73nbbTFHV6o5277cWLeB2dK9JNejrN';
-
-  //===第二版的地址
   var address2 = 'KT1T7XN6NtAFkkjbVfghj2CZiznxUoMx6p7g';
   var address3 = 'KT1LptkXZsPZFjKrPtqKiNqjazbk2AFb5EUz';
   var address4 = 'KT1P9xX4C2eCdhuZRHEBpLug4QWvcHZAuKXU';
   var address5 = 'KT1HoGmjSBaLJqSb3TupeRBYfwsa8NULqKR1';
   var address6 = 'KT1BgyMXbZcLBno1wnogDE4hnvwvw2xhfMgc';
   var address7 = 'KT1RLrDpQ1ZfbmDsZLaFv1Nc5dMeQgzCps4M';
+
+  //main net
+  var address8 = 'KT1UAJ9gkFPKFtfVA6GfsAmK2cJHGhR4TamN';
   
 
-  var address = address6;
-/*
+  var address = address8;
+
+  var result = await isMint(tezos,address,0);
+
+  console.log("the result is ", result);
+
+  var result1 = await isMint(tezos,address,1000);
+
+  console.log("the result is ", result1);
+
+  /*
+  //====== 测试update tokenmetadata
   try {
     var tt = await updateTokenMetadata(
       tezos, 
@@ -230,66 +246,62 @@ async function main() {
   }
   */
 
-  //var views = await getOffLineViews(tezos, address);
-
-  //console.log("views = ", views);
+  /*
+  //======测试 get offLine Views
+  var views = await getOffLineViews(tezos, address);
+  console.log("views = ", views);
+  */
 
   /*
-try {
-  var tt = await transferNfts(
-    tezos, 
-    'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i', 
-    address, 
-    'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i',
-    ['tz1QxrJUJP4RAGqi5h9VFB576ybRxafbqjPo'],
-    [2]
+  //======测试 NFT transfer
+  try {
+    var tt = await transferNfts(
+      tezos, 
+      'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i', 
+      address, 
+      'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i',
+      ['tz1QxrJUJP4RAGqi5h9VFB576ybRxafbqjPo'],
+      [2]
     );
 
     console.log("tt is ", tt);
-} catch (e) {
-  console.error(e);
-}
-*/
+  } catch (e) {
+    console.error(e);
+  }
+  */
 
 
+  /*
+  //======测试 mint NFT
+  try {
+    var tt = await mintNft(
+      tezos, 
+      'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i', 
+      address, 
+      'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i',
+      100,
+      'ipfs://QmWZbiAeykBqsiHUFDTvSR3mgoQ4sFwkaVsgbA4XGW5N32'
+      );
 
+      console.log("tt is ", tt);
+  } catch (e) {
+    console.error(e);
+  }
+  */
 
-try {
-  var tt = await mintNft(
-    tezos, 
-    'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i', 
-    address, 
-    'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i',
-    100,
-    'ipfs://QmWZbiAeykBqsiHUFDTvSR3mgoQ4sFwkaVsgbA4XGW5N32'
-    );
+  
+  var data = await getTokenMetadata(tezos, address, 0);
+  console.log("data is ", data);
+  
 
-    console.log("tt is ", tt);
-} catch (e) {
-  console.error(e);
-}
-
-/*
-var data = await getTokenMetadata(tezos, address, 10);
-console.log("data is ", data);
-*/
-/*
-var data2 = await getTokenMetadata(tezos, address, 1);
-console.log("data2 is ", data2);
-*/
-
-/*
+  /*
+  //======测试 get admin 和 minter
   var admin = await getAdmin(tezos, address);
   console.log("admin is ", admin);
 
   var minter = await getMinter(tezos, address);
   console.log("minter is ", minter);
-*/
-
-
-//var tx = await transferNft(tezos)
-
-//console.log("tx == ", tx)
+  */
 
 
   /*
@@ -302,47 +314,7 @@ console.log("data2 is ", data2);
   } catch (e) {
     console.error(e)
   }
-
-  //loadMetadata(tezos, contractAddress, network);
-  metaData(tezos, contractAddress);
   */
-  //metaDataViews(tezos, contractAddress);
-
-  //loadMetadata();
-
-  /*
-  network:mainnet
-  contractAddress:KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton
-  可以通过getTokenInfo拿到所有的 tokeninfo
-  
-  var tokenInfos = await getTokenInfo(tezos, contractAddress, network);
-  console.log("token is ", tokenInfos);
-  */
-
-  /*
-  获取余额,这个方法必须要提供signerProvider才可以执行
-  await getbalanceNormal(tezos, contractAddress, 'tz1XQtKoeezw6G9fHvztujHKypvFQSqZyTW6');
-  */
-
-  //await getContract();
-
-  /*
-  这个可以拉取合约所有token的归属，不需要私钥，全部拉取出来，然后再根据地址或者tokenid筛选
-  */
-  //await getLedger(tezos, contractAddress, network);
-
-  //await msigOffline1(tezos, 'KT1K9ANvkjT6Y6cU5QpAgVmJjJtrcAtoF49Z');
-  
-
-  //Multisigbatch();
-  //getContract();
-  //var tx = await offSignBath();
-
-  //var tx = await offSignNFT();
-  //console.log("tx is ", tx);
-  //e();
-  //estimate();
-  /////////////////
 }
 
 main();

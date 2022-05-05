@@ -5,6 +5,7 @@
     "isBooleanAmount":true,
     "description": "Meet and greet Joseph Wooten and the artists before the concert.",
     "type": "jpg",
+    "creatot": ["vincent"],
     "displayUri":  "ipfs://Qma5GFRMuPGYVRTNDwKQLjv3JbtssZB1K6D9W9589v7Uzf",
     "thumbnailUri": "ipfs://Qma5GFRMuPGYVRTNDwKQLjv3JbtssZB1K6D9W9589v7Uzf"
 }

@@ -3,8 +3,10 @@ import {
     TezosOperationError, 
     TezosToolkit, 
     compose, 
-    MichelsonMap 
+    MichelsonMap,
+    OpKind
 } from "@taquito/taquito";
+
 import { InMemorySigner } from '@taquito/signer';
 import { 
     hex2buf, 
@@ -99,7 +101,7 @@ function CheckMethod(method) {
         case "set_pause":
         case "update_operators":
         case "update_operators_all":
-        case "updata_token_metadata":
+        case "update_token_metadata":
             return true;
         default:
             return false;
@@ -205,6 +207,23 @@ export async function getTotalSupply(tezos, address) {
     
             console.log("total NFT is ", supply.toNumber());
             return supply.toNumber()
+        }
+    } catch (e) {
+        console.error(e)
+        throw e;
+    }
+
+    return 0;
+}
+
+export async function isMint(tezos, address, tokenId) {
+    try {
+        let views = await getOffLineViews(tezos, address);
+        if (views && views.hasOwnProperty("does_token_exist")) {
+            const result = await views.does_token_exist().executeView(tokenId);
+    
+            console.log("token id ", tokenId, " is ", result == true ? " mint" : " not mint");
+            return result;
         }
     } catch (e) {
         console.error(e)
@@ -396,6 +415,8 @@ export async function getTokenMetadata(tezos, contractAddress, token_id) {
 
         var meta = data['token_info'].get('');
 
+        console.log("data is ", data);
+
         var url = 'https://gateway.pinata.cloud/ipfs/' + bytes2Char(meta).substring(7,100);
 
         //let info = await got.get(bytes2Char(meta)).json();
@@ -451,7 +472,7 @@ export async function updateTokenMetadata(tezos, sender, contractAddress, tokens
             counter, 
             sender, 
             contractAddress, 
-            "updata_token_metadata", 
+            "update_token_metadata", 
             updateTokenParas);
         console.log(JSON.stringify(tx, null, 2));
 
@@ -477,3 +498,45 @@ curl -X 'POST' \
  -H 'Content-Type: application/json' \
  -d '"35e52e18f6ee4a617acf981bbd5914717fed4444f77e635a3a10ed03d9652cf76c002686f1fc5c0fe0d6ce5ad4be89ac4509d53e467d904e93c5d401a846e80700012214b6cf0fdddafbfae5de8cc689284a0784435f00ffff046d696e740000007607070100000024747a3150396b325a7a4a79696366704269744d394434466a6a796155774648396f54396907070200000041070401000000000a00000035697066733a2f2f516d575a62694165796b427173694855464454765352336d676f51347346776b61567367624134584757354e333200a401ed9b5ee2b2a4b33d651215bc19170b80590fa7783aedf7bef1c2616010916307a217de12f958b9e8f2d91a53b8b33395c13f84e1820af8f64b5c5934a4395e0a"'
 */
+
+
+export async function testBatch(tezos) {
+
+    var singer = await InMemorySigner.fromSecretKey('edskRhPEQARsiRQX4BREN4ssYmh4Eafinio8Dr3vXdtAZ8TU6n7cfoUdSC4eCyGUn7mvxpXeLZySacG4DPoLnh1g7sjtpPzrYB');
+
+    tezos.setSignerProvider(singer);
+
+    const contract = await tezos.contract.at(
+        'KT1RLrDpQ1ZfbmDsZLaFv1Nc5dMeQgzCps4M', 
+        compose(tzip16, tzip12));
+    /*
+    const batch = await tezos.wallet.batch([
+        { kind: OpKind.TRANSACTION, 
+            ...contract.methods.default([['Unit']]).toTransferParams() 
+        },
+        { kind: OpKind.TRANSACTION, 
+            ...contract.methods.default([['Unit']]).toTransferParams() 
+        }
+    ]);
+    */
+
+    const metadataMap = MichelsonMap.fromLiteral({'': '697066733a2f2f516d575a62694165796b427173694855464454765352336d676f51347346776b61567367624134584757354e3332'});
+    
+    const batch = await tezos.wallet.batch()
+    .withContractCall(contract.methods.mint('tz1XmFxCX97NTDT9xq9LwxySDUt7mcyNwm6Y', metadataMap, 400))
+    .withContractCall(contract.methods.mint('tz1XmFxCX97NTDT9xq9LwxySDUt7mcyNwm6Y', metadataMap, 500))
+    .withContractCall(contract.methods.transfer(
+        [
+        {
+            from_:'tz1XmFxCX97NTDT9xq9LwxySDUt7mcyNwm6Y',
+            txs:[{to_:'tz1P9k2ZzJyicfpBitM9D4FjjyaUwFH9oT9i', token_id:400, amount:1}]
+        }
+        ]
+        )
+    )
+
+    const batchOp = await batch.send();
+    console.log('Operation hash:', batchOp.opHash);
+    await batchOp.confirmation();
+}
+    
